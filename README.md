@@ -27,10 +27,36 @@ Most rspec tests are run against the actual teamstuff API. For the tests to run/
 in these environment variables: `TS_USERNAME`, `TS_PASSWORD`.
 
 e.g. run tests like
-
 ```bash
 TS_USERNAME='grotemeneer@haagscherugbyclub.nl' TS_PASSWORD='ewirfjwpqo43098j' rake
 ```
+
+Currently teamstuff objects returned are mostly still bare Hashes, not mapping onto a proper class model.
+
+Example creating and subsequently deleting teams:
+
+```ruby
+client = Client.new 'email_username', 'password'
+
+invites =
+    [
+        {
+            "member_type" => "manager",
+            "email" => "tmmgr@hrc.example",
+            "name" => "Toffe teammanager"
+        }
+    ]
+
+client.create_team team_name: "Wales", league: "GTBM", sport: "Rugby", invites: invites
+client.create_team team_name: "Ireland", league: "GTBM", sport: "Rugby", invites: invites
+
+teams = client.get_teams
+
+teams.map { |team| team['id'] }
+    .map { |id| client.delete_team id }
+```
+
+Allowed `member_types`: `"player", "parent", "manager", "coach", "coach_and_manager"`
 
 ## Development
 
