@@ -25,15 +25,27 @@ module Teamstuff
 
       it "has a valid user_profile" do
         expect(client.userinfo).to be_a Hash
-        expect(client.userinfo).to include("id", "email", "registered", "verified", "nickname", "name", "created_at")
+        expect(client.userinfo).to be_a_ts_user_profile
       end
 
       it "has a context for the user/profile" do
         expect(client.context).to be_a Hash
       end
 
-      it "can get the evets schedule" do
+      it "can get the events schedule" do
         expect(client.get_events).to be_a Hash
+      end
+
+      it "can get a member profile" do
+        expect(client.get_member).to be_a_ts_user_profile
+      end
+
+      it "can get all member profiles" do
+        profiles = client.get_member_profiles
+        expect(profiles).to include("members", "member_types", "teams", "club_memberships", "clubs")
+
+        members = profiles['members'].values
+        expect(members).to include(be_a_ts_user_profile)
       end
 
     end

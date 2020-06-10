@@ -12,3 +12,9 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 end
+
+RSpec::Matchers.define :be_a_ts_user_profile do
+  match do |actual|
+    expect(actual).to include("id", "email", "registered", "verified", "nickname", "name", "created_at")
+  end
+end
