@@ -108,7 +108,6 @@ module Teamstuff
     end
 
     def create_team team_name:, sport:, league:, invites: [], open_invite: true, kids_team: true
-
       team_params =
           {
               name: team_name,
@@ -128,6 +127,20 @@ module Teamstuff
       http_client
           .delete("https://teamstuff.com/data/teams/#{id}")
           .status.success?
+    end
+
+    def get_activities max_entries: 50, page: 0
+      json_response do |client|
+        client.get('https://teamstuff.com/data/activities',
+                   params: {page_size: max_entries, page_num: page}
+        )
+      end
+    end
+
+    def get_alerts
+      json_response do |client|
+        client.get('https://teamstuff.com/data/alerts')
+      end
     end
 
   end
