@@ -1,3 +1,4 @@
+require 'hashie'
 require "teamstuff/version"
 require "teamstuff/client"
 

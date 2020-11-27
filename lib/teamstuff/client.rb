@@ -1,6 +1,13 @@
 require 'http'
 require 'pry'
+require 'hashie'
 require 'active_support/time'
+
+require_relative 'session'
+require_relative 'invite'
+require_relative 'member'
+require_relative 'membership'
+require_relative 'team'
 
 module Teamstuff
   class Client
@@ -25,11 +32,11 @@ module Teamstuff
           .headers(:accept => "application/vnd.teamstuff.com.v13+json, application/json")
     end
 
-    private def json_response err_class = RequestFailed
+    def json_response err_class = RequestFailed
       response = yield http_client
 
       if response.status.success?
-        JSON.parse response.to_s
+        Hashie::Mash.new(JSON.parse response.to_s)
       else
         raise err_class, response.to_s
       end
@@ -105,28 +112,12 @@ module Teamstuff
     def get_teams
       json_response { |cl| cl.get 'https://teamstuff.com/data/teams' }
           .fetch('teams', [])
+          .map { |team| Team.new team }
     end
 
-    def create_team team_name:, sport:, league:, invites: [], open_invite: true, kids_team: true
-      team_params =
-          {
-              name: team_name,
-              kids_team: kids_team,
-              open_invitation_enabled: open_invite,
-              sport_attributes: {name: sport},
-              league_attributes: {name: league},
-              team_invitations_attributes: invites
-          }
-
-      json_response do |client|
-        client.post 'https://teamstuff.com/data/teams', json: {team: team_params}
-      end
-    end
-
-    def delete_team id:
-      http_client
-          .delete("https://teamstuff.com/data/teams/#{id}")
-          .status.success?
+    def get_team id
+      resp = json_response { |cl| cl.get "https://teamstuff.com/data/teams/#{id}" }
+      Team.new resp
     end
 
     def get_activities max_entries: 50, page: 0
